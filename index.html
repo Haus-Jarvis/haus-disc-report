@@ -1,13 +1,423 @@
 <!DOCTYPE html>
-<html lang="en">
-<head><meta charset="UTF-8"><title>haus-disc-report</title>
-<style>body{font-family:sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;background:#0f172a;color:#94a3b8;text-align:center}</style>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Disc 사용 분석 리포트 | 2026.01–05</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,900&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" rel="stylesheet">
+<style>
+:root{--navy:#0A2342;--navy2:#102b4e;--dark:#1F4E79;--mid:#2E75B6;--gold:#C8A456;--gold-lt:#E5C77E;
+--ice:#D6E4F0;--sky:#BDD7EE;--mint:#7FB77E;--cream:#E8C872;--up:#2E9E5B;--up-bg:#E8F5E9;
+--dn:#D64545;--dn-bg:#FCEBEA;--warn:#E8A33D;--warn-bg:#FDF4E3;--paper:#F4F6FA;--ink:#1A1A2E;
+--muted:#6B7280;--line:#E5E8EE;--card:#FFFFFF}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Pretendard',sans-serif;background:var(--paper);color:var(--ink);line-height:1.5;-webkit-font-smoothing:antialiased}
+.serif{font-family:'Fraunces',serif}
+.top{background:linear-gradient(120deg,var(--navy),var(--navy2) 60%,var(--dark));color:#fff;padding:26px 5vw 0;position:sticky;top:0;z-index:100;box-shadow:0 6px 28px -10px rgba(10,35,66,.5)}
+.top-inner{max-width:1320px;margin:0 auto}
+.toprow{display:flex;justify-content:space-between;align-items:flex-start;gap:16px}
+.brand{display:flex;align-items:center;gap:12px;margin-bottom:8px}
+.brand-mark{width:36px;height:36px;border:2px solid var(--gold);border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'Fraunces',serif;font-weight:900;font-size:19px;color:var(--gold)}
+.brand-txt{font-size:12px;letter-spacing:.3em;font-weight:600;color:var(--gold-lt)}
+.top h1{font-family:'Fraunces',serif;font-weight:900;font-size:clamp(23px,3.1vw,34px);line-height:1.1;margin-bottom:3px}
+.top h1 em{font-style:italic;color:var(--gold-lt)}
+.top .meta{font-size:13px;color:var(--ice);margin-bottom:16px}
+.top .meta b{color:var(--gold-lt)}
+.lang-tog{display:flex;background:rgba(255,255,255,.1);border-radius:9px;padding:3px;gap:2px;flex-shrink:0;margin-top:4px}
+.lang-tog button{border:none;background:transparent;color:var(--ice);padding:6px 14px;border-radius:7px;font-family:'Pretendard';font-size:13px;font-weight:700;cursor:pointer;transition:all .2s}
+.lang-tog button.active{background:var(--gold);color:var(--navy)}
+.tabs{display:flex;gap:2px;flex-wrap:wrap}
+.tabs button{background:rgba(255,255,255,.06);border:none;color:var(--ice);padding:13px 22px;font-family:'Pretendard';font-size:14px;font-weight:600;cursor:pointer;border-radius:10px 10px 0 0;transition:all .2s;border-bottom:3px solid transparent}
+.tabs button:hover{background:rgba(255,255,255,.13)}
+.tabs button.active{background:var(--paper);color:var(--navy);border-bottom:3px solid var(--gold)}
+.tabs button .ico{margin-right:6px}
+.wrap{max-width:1320px;margin:0 auto;padding:34px 5vw 70px}
+.page{display:none;animation:fade .45s ease both}
+.page.active{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.sec-head{display:flex;align-items:baseline;justify-content:space-between;margin:34px 0 18px;flex-wrap:wrap;gap:10px}
+.sec-head:first-child{margin-top:4px}
+.sec-title{font-family:'Fraunces',serif;font-weight:600;font-size:23px;color:var(--navy);display:flex;align-items:center;gap:11px}
+.sec-title .n{font-size:12px;color:var(--gold);border:1.5px solid var(--gold);border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-family:'Pretendard';font-weight:700;flex-shrink:0}
+.sec-desc{font-size:13px;color:var(--muted)}
+.card{background:var(--card);border-radius:15px;border:1px solid var(--line);padding:24px;box-shadow:0 4px 20px -10px rgba(10,35,66,.12)}
+.card h3{font-size:15.5px;font-weight:600;color:var(--navy);margin-bottom:3px;display:flex;align-items:center;gap:8px}
+.card .hint{font-size:12.5px;color:var(--muted);margin-bottom:16px}
+.grid2{display:grid;grid-template-columns:1.5fr 1fr;gap:18px}
+.grid2b{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.chart-box{position:relative;height:360px}.chart-box.sm{height:280px}.chart-box.lg{height:420px}
+.mtog{display:inline-flex;background:#EEF1F6;border-radius:9px;padding:3px;gap:2px;margin-bottom:14px;flex-wrap:wrap}
+.mtog button{border:none;background:transparent;padding:6px 13px;border-radius:6px;font-family:'Pretendard';font-size:12.5px;font-weight:600;color:var(--muted);cursor:pointer;transition:all .18s}
+.mtog button.active{background:#fff;color:var(--navy);box-shadow:0 2px 7px -2px rgba(10,35,66,.25)}
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:8px}
+.kpi{background:var(--card);border-radius:15px;padding:22px 20px;border:1px solid var(--line);box-shadow:0 8px 28px -14px rgba(10,35,66,.22);position:relative;overflow:hidden}
+.kpi-bar{position:absolute;top:0;left:0;width:100%;height:4px}
+.kpi:nth-child(1) .kpi-bar{background:var(--dark)}.kpi:nth-child(2) .kpi-bar{background:var(--mid)}
+.kpi:nth-child(3) .kpi-bar{background:var(--gold)}.kpi:nth-child(4) .kpi-bar{background:linear-gradient(90deg,var(--navy),var(--gold))}
+.kpi-label{font-size:12px;color:var(--muted);font-weight:500}
+.kpi-val{font-family:'Fraunces',serif;font-weight:900;font-size:38px;line-height:1;margin:8px 0 7px;color:var(--navy)}
+.kpi-sub{display:inline-flex;align-items:center;gap:4px;font-size:12.5px;font-weight:600;padding:3px 9px;border-radius:18px}
+.kpi-sub.dn{background:var(--dn-bg);color:var(--dn)}.kpi-sub.up{background:var(--up-bg);color:var(--up)}.kpi-sub.neutral{background:#EEF1F6;color:var(--muted)}
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+th,td{padding:8px 9px;text-align:center;border-bottom:1px solid var(--line)}
+th{background:var(--navy);color:#fff;font-weight:600;font-size:11.5px}
+th.grp{background:var(--dark)}
+td:first-child,th:first-child{text-align:left;font-weight:600}
+tbody tr:hover{background:#F2F6FB}
+.tbl-wrap{max-height:480px;overflow:auto;border-radius:12px;border:1px solid var(--line)}
+.row-prod{background:#F2F9F0}.row-sale{background:#FDFAF0}.row-mon{background:var(--sky);font-weight:700}
+/* === 틀고정(freeze) === */
+#haTbl{border-collapse:separate;border-spacing:0}
+#haTbl thead th{position:sticky;top:0;z-index:5}
+#haTbl th:nth-child(1),#haTbl td:nth-child(1){position:sticky;left:0;z-index:3;width:84px;min-width:84px;max-width:84px;font-size:11.5px}
+#haTbl th:nth-child(2),#haTbl td:nth-child(2){position:sticky;left:84px;z-index:3;width:60px;min-width:60px;max-width:60px}
+#haTbl thead th:nth-child(1),#haTbl thead th:nth-child(2){z-index:6}
+#haTbl tr.row-mon td:nth-child(1),#haTbl tr.row-mon td:nth-child(2){background:var(--sky)}
+#haTbl tr.row-prod td:nth-child(1),#haTbl tr.row-prod td:nth-child(2){background:#F2F9F0}
+#haTbl tr.row-sale td:nth-child(1),#haTbl tr.row-sale td:nth-child(2){background:#FDFAF0}
+#obTbl{border-collapse:separate;border-spacing:0}
+#obTbl thead th{position:sticky;top:0;z-index:5}
+#obTbl th:nth-child(1),#obTbl td:nth-child(1){position:sticky;left:0;z-index:3;width:108px;min-width:108px;max-width:108px;background:#fff}
+#obTbl thead th:nth-child(1){z-index:6}
+#obTbl tr.row-tot td:nth-child(1){background:#ECEFF4}
+#obTbl2{border-collapse:separate;border-spacing:0}
+#obTbl2 thead th{position:sticky;top:0;z-index:5}
+#obTbl2 th:nth-child(1),#obTbl2 td:nth-child(1){position:sticky;left:0;z-index:3;width:120px;min-width:120px;max-width:120px;background:#fff}
+#obTbl2 thead th:nth-child(1){z-index:6}
+#obTbl2 tr.row-tot td:nth-child(1){background:#FDFAF0}
+.row-tot{background:#ECEFF4;font-weight:700}
+.up{color:var(--up);font-weight:700}.dn{color:var(--dn);font-weight:700}
+.chip{display:inline-block;padding:1px 7px;border-radius:10px;font-size:11px;font-weight:600}
+.chip.ha{background:var(--ice);color:var(--dark)}.chip.aidite{background:#E3F0FB;color:#1a6bb5}.chip.haus{background:#E9F6E8;color:#2e7d32}
+.sig-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:13px}
+.sig{border-radius:13px;padding:17px;border:1px solid var(--line);position:relative}
+.sig.up{background:linear-gradient(135deg,#F2FBF4,#fff)}.sig.dn{background:linear-gradient(135deg,#FEF3F2,#fff)}
+.sig .arr{font-size:19px;font-weight:700}.sig.up .arr{color:var(--up)}.sig.dn .arr{color:var(--dn)}
+.sig-name{font-size:14.5px;font-weight:700;color:var(--navy);margin:3px 0}
+.sig-mom{font-size:21px;font-family:'Fraunces',serif;font-weight:900;margin:5px 0 2px}
+.sig.up .sig-mom{color:var(--up)}.sig.dn .sig-mom{color:var(--dn)}
+.sig-avg{font-size:12px;color:var(--muted);font-weight:500}
+.recon-banner{background:linear-gradient(120deg,#FDF4E3,#fff);border:1.5px solid var(--warn);border-radius:15px;padding:22px 26px;margin-bottom:22px;display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+.recon-banner .big{font-family:'Fraunces',serif;font-weight:900;font-size:42px;color:var(--dn)}
+.recon-banner .txt{flex:1;min-width:240px}
+.recon-banner .txt h4{font-size:17px;color:var(--navy);margin-bottom:4px;font-weight:600}
+.recon-banner .txt p{font-size:13px;color:var(--muted)}
+.recon-tbl td,.recon-tbl th{padding:11px 10px}
+.match-n{background:var(--dn-bg);color:var(--dn);font-weight:700;border-radius:6px;padding:2px 10px;font-size:12px}
+.diff-pos{color:var(--up);font-weight:700}.diff-neg{color:var(--dn);font-weight:700}
+.diff-cell{font-family:'Fraunces',serif;font-weight:900;font-size:16px}
+.note{background:#F8FAFC;border-left:3px solid var(--gold);padding:13px 17px;border-radius:0 9px 9px 0;font-size:13px;color:var(--muted);margin-top:14px}
+.note b{color:var(--navy)}
+.footer{background:var(--navy);color:var(--ice);padding:26px 5vw;text-align:center;font-size:12.5px;margin-top:46px}
+.footer b{color:var(--gold-lt)}
+@media(max-width:900px){.kpi-grid{grid-template-columns:repeat(2,1fr)}.grid2,.grid2b{grid-template-columns:1fr}.toprow{flex-direction:column}}
+</style>
 </head>
 <body>
-<div>
-  <div style="font-size:48px;margin-bottom:16px">📊</div>
-  <h1 style="color:#e2e8f0;margin:0 0 8px">Haus Milling Center</h1>
-  <p style="margin:0 0 24px;font-size:18px">Haus Milling Center - Block & Disc Usage Report 2026</p>
-  <p style="font-size:14px;opacity:0.6">Report coming soon — updating monthly</p>
+<div class="top"><div class="top-inner">
+  <div class="toprow">
+    <div>
+      <div class="brand"><div class="brand-mark">H</div><div class="brand-txt" data-i="brand">HAUS MILLING CENTER</div></div>
+      <h1><span data-i="title_a">Disc</span> <em data-i="title_em">사용 분석</em> <span data-i="title_b">리포트</span></h1>
+      <div class="meta" data-ih="meta"></div>
+    </div>
+    <div class="lang-tog"><button data-lang="ko">한국어</button><button class="active" data-lang="en">EN</button></div>
+  </div>
+  <div class="tabs">
+    <button class="active" data-tab="ov"><span class="ico">📊</span><span data-i="tab_ov">개요</span></button>
+    <button data-tab="ha"><span class="ico">🟦</span><span data-i="tab_ha">Haus/Aidite</span></button>
+    <button data-tab="ob"><span class="ico">🟨</span><span data-i="tab_ob">Other Blocks</span></button>
+    <button data-tab="ch"><span class="ico">🛒</span><span data-i="tab_ch">채널 판매</span></button>
+    <button data-tab="rc"><span class="ico">🔗</span><span data-i="tab_rc">Haus Link 검증</span></button>
+  </div>
+</div></div>
+<div class="wrap">
+
+<div class="page active" id="ov">
+  <div class="kpi-grid">
+    <div class="kpi"><div class="kpi-bar"></div><div class="kpi-label" data-i="kpi1"></div><div class="kpi-val" id="k1">0</div><div class="kpi-sub dn" data-i="kpi1s"></div></div>
+    <div class="kpi"><div class="kpi-bar"></div><div class="kpi-label" data-i="kpi2"></div><div class="kpi-val" id="k2">0</div><div class="kpi-sub dn" data-i="kpi2s"></div></div>
+    <div class="kpi"><div class="kpi-bar"></div><div class="kpi-label" data-i="kpi3"></div><div class="kpi-val" id="k3">0</div><div class="kpi-sub dn" data-i="kpi3s"></div></div>
+    <div class="kpi"><div class="kpi-bar"></div><div class="kpi-label" data-i="kpi4"></div><div class="kpi-val" id="k4">0</div><div class="kpi-sub neutral" data-i="kpi4s"></div></div>
+  </div>
+  <div class="sec-head"><div class="sec-title"><span class="n">1</span><span data-i="ov_s1"></span></div><div class="sec-desc" data-i="ov_s1d"></div></div>
+  <div class="grid2">
+    <div class="card"><h3 data-i="ov_c1"></h3><div class="hint" data-i="ov_c1h"></div><div class="chart-box"><canvas id="trendChart"></canvas></div></div>
+    <div class="card"><h3 data-i="ov_c2"></h3><div class="hint" data-i="ov_c2h"></div><div class="chart-box"><canvas id="psChart"></canvas></div></div>
+  </div>
+  <div class="sec-head"><div class="sec-title"><span class="n">2</span><span data-i="ov_s2"></span></div><div class="sec-desc" data-i="ov_s2d"></div></div>
+  <div class="grid2b">
+    <div class="card"><h3 data-i="ov_c3"></h3><div class="hint" data-i="ov_c3h"></div><div class="chart-box sm"><canvas id="stackChart"></canvas></div></div>
+    <div class="card"><h3 data-i="ov_c4"></h3><div class="hint" data-i="ov_c4h"></div><div class="chart-box sm"><canvas id="donutChart"></canvas></div></div>
+  </div>
 </div>
+
+<div class="page" id="ha">
+  <div class="sec-head"><div class="sec-title"><span class="n">1</span><span data-i="ha_s1"></span></div><div class="sec-desc" data-i="ha_s1d"></div></div>
+  <div class="grid2">
+    <div class="card"><h3 data-i="ha_c1"></h3><div class="hint" data-i="ha_c1h"></div>
+      <div class="mtog" id="haMtog"><button class="active" data-m="all"></button><button data-m="1"></button><button data-m="2"></button><button data-m="3"></button><button data-m="4"></button><button data-m="5"></button></div>
+      <div class="chart-box"><canvas id="haStack"></canvas></div></div>
+    <div class="card"><h3 id="haRankTitle"></h3><div class="hint" data-i="ha_c2h"></div><div class="chart-box"><canvas id="haRank"></canvas></div></div>
+  </div>
+  <div class="sec-head"><div class="sec-title"><span class="n">2</span><span data-i="ha_s2"></span></div><div class="sec-desc" data-i="ha_s2d"></div></div>
+  <div class="sig-grid" id="haSig"></div>
+  <div class="sec-head"><div class="sec-title"><span class="n">3</span><span data-i="ha_s3"></span></div></div>
+  <div class="card" style="padding:0;overflow:hidden"><div class="tbl-wrap"><table id="haTbl"></table></div></div>
+</div>
+
+<div class="page" id="ob">
+  <div class="sec-head"><div class="sec-title"><span class="n">1</span><span data-i="ob_s1"></span></div><div class="sec-desc" data-i="ob_s1d"></div></div>
+  <div class="grid2">
+    <div class="card"><h3 data-i="ob_c1"></h3><div class="hint" data-i="ob_c1h"></div><div class="chart-box"><canvas id="obTrend"></canvas></div></div>
+    <div class="card"><h3 data-i="ob_c2"></h3><div class="hint" data-i="ob_c2h"></div><div class="chart-box"><canvas id="obDonut"></canvas></div></div>
+  </div>
+  <div class="sec-head"><div class="sec-title"><span class="n">2</span><span data-i="ob_s2"></span></div></div>
+  <div class="card"><h3 data-i="ob_c3"></h3><div class="hint" data-i="ob_c3h"></div>
+    <div class="mtog" id="obMtog"><button class="active" data-m="all"></button><button data-m="1"></button><button data-m="2"></button><button data-m="3"></button><button data-m="4"></button><button data-m="5"></button></div>
+    <div class="chart-box lg"><canvas id="obStack"></canvas></div></div>
+  <div class="sec-head"><div class="sec-title"><span class="n">3</span><span data-i="ob_s3"></span></div></div>
+  <div class="card" style="padding:0;overflow:hidden"><div class="tbl-wrap"><table id="obTbl"></table></div></div>
+  <div class="note" data-ih="ob_note"></div>
+  <div class="sec-head"><div class="sec-title"><span class="n">4</span><span data-i="ob_s4"></span></div><div class="sec-desc" data-i="ob_s4d"></div></div>
+  <div class="card" style="padding:0;overflow:hidden"><div class="tbl-wrap"><table id="obTbl2"></table></div></div>
+</div>
+
+<div class="page" id="ch">
+  <div class="sec-head"><div class="sec-title"><span class="n">1</span><span data-i="ch_s1"></span></div><div class="sec-desc" data-i="ch_s1d"></div></div>
+  <div class="grid2">
+    <div class="card"><h3 data-i="ch_c1"></h3><div class="hint" data-i="ch_c1h"></div><div class="chart-box"><canvas id="chChart"></canvas></div></div>
+    <div class="card"><h3 data-i="ch_c2"></h3><div class="hint" data-i="ch_c2h"></div><div class="chart-box"><canvas id="chDonut"></canvas></div></div>
+  </div>
+  <div class="sec-head"><div class="sec-title"><span class="n">2</span><span data-i="ch_s2"></span></div></div>
+  <div class="card" style="padding:0;overflow:hidden"><table id="chTbl"></table></div>
+  <div class="grid2b" style="margin-top:18px">
+    <div class="card" style="padding:0;overflow:hidden"><div style="padding:18px 24px 4px"><h3 data-i="ch_shop"></h3><div class="hint" data-i="ch_shoph"></div></div><div class="tbl-wrap" style="border:none"><table id="shopTbl"></table></div></div>
+    <div class="card" style="padding:0;overflow:hidden"><div style="padding:18px 24px 4px"><h3 data-i="ch_ev"></h3><div class="hint" data-i="ch_evh"></div></div><div class="tbl-wrap" style="border:none"><table id="evTbl"></table></div></div>
+  </div>
+</div>
+
+<div class="page" id="rc">
+  <div class="sec-head"><div class="sec-title"><span class="n">★</span><span data-i="rc_s1"></span></div><div class="sec-desc" data-i="rc_s1d"></div></div>
+  <div class="recon-banner"><div class="big" style="color:var(--up)">+15</div><div class="txt"><h4 data-ih="rc_bh"></h4><p data-ih="rc_bp"></p></div></div>
+  <div class="grid2">
+    <div class="card"><h3 data-i="rc_c1"></h3><div class="hint" data-i="rc_c1h"></div><div class="chart-box"><canvas id="rcChart"></canvas></div></div>
+    <div class="card"><h3 data-i="rc_c2"></h3><div class="hint" data-i="rc_c2h"></div><div class="chart-box"><canvas id="rcCompare"></canvas></div></div>
+  </div>
+  <div class="sec-head"><div class="sec-title"><span class="n">2</span><span data-i="rc_s2"></span></div></div>
+  <div class="card" style="padding:0;overflow:hidden"><table class="recon-tbl" id="rcTbl"></table></div>
+  <div class="note" data-ih="rc_note"></div>
+</div>
+
+</div>
+<div class="footer"><span data-ih="footer1"></span><br><span style="opacity:.7;font-size:11.5px" data-i="footer2"></span></div>
+<script>
+const DATA={"months": [1, 2, 3, 4, 5], "monthly": {"1": {"prod": 401, "sale": 516, "total": 917, "ha": 835, "ob": 82}, "2": {"prod": 691, "sale": 554, "total": 1245, "ha": 964, "ob": 281}, "3": {"prod": 520, "sale": 658, "total": 1178, "ha": 1086, "ob": 92}, "4": {"prod": 476, "sale": 659, "total": 1135, "ha": 1069, "ob": 65}, "5": {"prod": 459, "sale": 533, "total": 992, "ha": 942, "ob": 50}}, "ha_item": {"1": {"Haus HT+": 259, "Haus ML+": 217, "Haus SP+": 54, "Haus ML Pro": 128, "SHTC": 19, "SHTAPM": 49, "SHTPC": 19, "3D Pro Zir": 55, "Pmma (Mono)": 27, "Pmma (Multi)": 8, "Pmma (Pink)": 0, "Titanium Disk": 0}, "2": {"Haus HT+": 275, "Haus ML+": 222, "Haus SP+": 108, "Haus ML Pro": 171, "SHTC": 20, "SHTAPM": 54, "SHTPC": 23, "3D Pro Zir": 51, "Pmma (Mono)": 22, "Pmma (Multi)": 6, "Pmma (Pink)": 5, "Titanium Disk": 7}, "3": {"Haus HT+": 329, "Haus ML+": 259, "Haus SP+": 111, "Haus ML Pro": 183, "SHTC": 33, "SHTAPM": 55, "SHTPC": 24, "3D Pro Zir": 51, "Pmma (Mono)": 19, "Pmma (Multi)": 6, "Pmma (Pink)": 3, "Titanium Disk": 13}, "4": {"Haus HT+": 266, "Haus ML+": 263, "Haus SP+": 137, "Haus ML Pro": 191, "SHTC": 21, "SHTAPM": 60, "SHTPC": 27, "3D Pro Zir": 58, "Pmma (Mono)": 18, "Pmma (Multi)": 7, "Pmma (Pink)": 4, "Titanium Disk": 17}, "5": {"Haus HT+": 256, "Haus ML+": 238, "Haus SP+": 78, "Haus ML Pro": 139, "SHTC": 13, "SHTAPM": 97, "SHTPC": 24, "3D Pro Zir": 33, "Pmma (Mono)": 15, "Pmma (Multi)": 13, "Pmma (Pink)": 18, "Titanium Disk": 18}}, "ha_p": {"1": {"Haus HT+": 170, "Haus ML+": 68, "Haus SP+": 25, "Haus ML Pro": 44, "SHTC": 0, "SHTAPM": 0, "SHTPC": 0, "3D Pro Zir": 2, "Pmma (Mono)": 15, "Pmma (Multi)": 6, "Pmma (Pink)": 0, "Titanium Disk": 0}, "2": {"Haus HT+": 225, "Haus ML+": 81, "Haus SP+": 48, "Haus ML Pro": 53, "SHTC": 0, "SHTAPM": 0, "SHTPC": 0, "3D Pro Zir": 2, "Pmma (Mono)": 11, "Pmma (Multi)": 2, "Pmma (Pink)": 5, "Titanium Disk": 7}, "3": {"Haus HT+": 240, "Haus ML+": 88, "Haus SP+": 46, "Haus ML Pro": 37, "SHTC": 0, "SHTAPM": 1, "SHTPC": 0, "3D Pro Zir": 1, "Pmma (Mono)": 10, "Pmma (Multi)": 4, "Pmma (Pink)": 3, "Titanium Disk": 13}, "4": {"Haus HT+": 199, "Haus ML+": 95, "Haus SP+": 42, "Haus ML Pro": 34, "SHTC": 0, "SHTAPM": 2, "SHTPC": 0, "3D Pro Zir": 0, "Pmma (Mono)": 12, "Pmma (Multi)": 6, "Pmma (Pink)": 4, "Titanium Disk": 17}, "5": {"Haus HT+": 198, "Haus ML+": 73, "Haus SP+": 33, "Haus ML Pro": 34, "SHTC": 0, "SHTAPM": 10, "SHTPC": 1, "3D Pro Zir": 1, "Pmma (Mono)": 10, "Pmma (Multi)": 13, "Pmma (Pink)": 18, "Titanium Disk": 18}}, "ha_s": {"1": {"Haus HT+": 89, "Haus ML+": 149, "Haus SP+": 29, "Haus ML Pro": 84, "SHTC": 19, "SHTAPM": 49, "SHTPC": 19, "3D Pro Zir": 53, "Pmma (Mono)": 12, "Pmma (Multi)": 2, "Pmma (Pink)": 0, "Titanium Disk": 0}, "2": {"Haus HT+": 50, "Haus ML+": 141, "Haus SP+": 60, "Haus ML Pro": 118, "SHTC": 20, "SHTAPM": 54, "SHTPC": 23, "3D Pro Zir": 49, "Pmma (Mono)": 11, "Pmma (Multi)": 4, "Pmma (Pink)": 0, "Titanium Disk": 0}, "3": {"Haus HT+": 89, "Haus ML+": 171, "Haus SP+": 65, "Haus ML Pro": 146, "SHTC": 33, "SHTAPM": 54, "SHTPC": 24, "3D Pro Zir": 50, "Pmma (Mono)": 9, "Pmma (Multi)": 2, "Pmma (Pink)": 0, "Titanium Disk": 0}, "4": {"Haus HT+": 67, "Haus ML+": 168, "Haus SP+": 95, "Haus ML Pro": 157, "SHTC": 21, "SHTAPM": 58, "SHTPC": 27, "3D Pro Zir": 58, "Pmma (Mono)": 6, "Pmma (Multi)": 1, "Pmma (Pink)": 0, "Titanium Disk": 0}, "5": {"Haus HT+": 58, "Haus ML+": 165, "Haus SP+": 45, "Haus ML Pro": 105, "SHTC": 13, "SHTAPM": 87, "SHTPC": 23, "3D Pro Zir": 32, "Pmma (Mono)": 5, "Pmma (Multi)": 0, "Pmma (Pink)": 0, "Titanium Disk": 0}}, "ob_item": {"1": {"Explore - F": 24, "Argen HT": 18, "Argen ST": 6, "Bruxzir": 5, "Katana STML": 0, "Katana UTML": 0, "Layzir": 3, "Prime": 4, "Ivotion-U": 9, "Ivotion-L": 9, "Aidite Bio. Kit": 4}, "2": {"Explore - F": 162, "Argen HT": 48, "Argen ST": 44, "Bruxzir": 5, "Katana STML": 0, "Katana UTML": 1, "Layzir": 5, "Prime": 8, "Ivotion-U": 5, "Ivotion-L": 1, "Aidite Bio. Kit": 2}, "3": {"Explore - F": 29, "Argen HT": 19, "Argen ST": 7, "Bruxzir": 7, "Katana STML": 1, "Katana UTML": 1, "Layzir": 4, "Prime": 9, "Ivotion-U": 8, "Ivotion-L": 6, "Aidite Bio. Kit": 1}, "4": {"Explore - F": 13, "Argen HT": 16, "Argen ST": 7, "Bruxzir": 8, "Katana STML": 1, "Katana UTML": 0, "Layzir": 3, "Prime": 11, "Ivotion-U": 3, "Ivotion-L": 3, "Aidite Bio. Kit": 0}, "5": {"Explore - F": 19, "Argen HT": 11, "Argen ST": 4, "Bruxzir": 6, "Katana STML": 0, "Katana UTML": 0, "Layzir": 3, "Prime": 5, "Ivotion-U": 2, "Ivotion-L": 0, "Aidite Bio. Kit": 0}}, "ob_p": {"1": {"Explore - F": 17, "Argen HT": 18, "Argen ST": 6, "Bruxzir": 5, "Katana STML": 0, "Katana UTML": 0, "Layzir": 3, "Prime": 4, "Ivotion-U": 9, "Ivotion-L": 9, "Aidite Bio. Kit": 0}, "2": {"Explore - F": 140, "Argen HT": 48, "Argen ST": 44, "Bruxzir": 5, "Katana STML": 0, "Katana UTML": 1, "Layzir": 5, "Prime": 8, "Ivotion-U": 5, "Ivotion-L": 1, "Aidite Bio. Kit": 0}, "3": {"Explore - F": 15, "Argen HT": 19, "Argen ST": 7, "Bruxzir": 7, "Katana STML": 1, "Katana UTML": 1, "Layzir": 4, "Prime": 9, "Ivotion-U": 8, "Ivotion-L": 6, "Aidite Bio. Kit": 0}, "4": {"Explore - F": 13, "Argen HT": 16, "Argen ST": 7, "Bruxzir": 8, "Katana STML": 1, "Katana UTML": 0, "Layzir": 3, "Prime": 11, "Ivotion-U": 3, "Ivotion-L": 3, "Aidite Bio. Kit": 0}, "5": {"Explore - F": 19, "Argen HT": 11, "Argen ST": 4, "Bruxzir": 6, "Katana STML": 0, "Katana UTML": 0, "Layzir": 3, "Prime": 5, "Ivotion-U": 2, "Ivotion-L": 0, "Aidite Bio. Kit": 0}}, "ob_s": {"1": {"Explore - F": 7, "Argen HT": 0, "Argen ST": 0, "Bruxzir": 0, "Katana STML": 0, "Katana UTML": 0, "Layzir": 0, "Prime": 0, "Ivotion-U": 0, "Ivotion-L": 0, "Aidite Bio. Kit": 4}, "2": {"Explore - F": 22, "Argen HT": 0, "Argen ST": 0, "Bruxzir": 0, "Katana STML": 0, "Katana UTML": 0, "Layzir": 0, "Prime": 0, "Ivotion-U": 0, "Ivotion-L": 0, "Aidite Bio. Kit": 2}, "3": {"Explore - F": 14, "Argen HT": 0, "Argen ST": 0, "Bruxzir": 0, "Katana STML": 0, "Katana UTML": 0, "Layzir": 0, "Prime": 0, "Ivotion-U": 0, "Ivotion-L": 0, "Aidite Bio. Kit": 1}, "4": {"Explore - F": 0, "Argen HT": 0, "Argen ST": 0, "Bruxzir": 0, "Katana STML": 0, "Katana UTML": 0, "Layzir": 0, "Prime": 0, "Ivotion-U": 0, "Ivotion-L": 0, "Aidite Bio. Kit": 0}, "5": {"Explore - F": 0, "Argen HT": 0, "Argen ST": 0, "Bruxzir": 0, "Katana STML": 0, "Katana UTML": 0, "Layzir": 0, "Prime": 0, "Ivotion-U": 0, "Ivotion-L": 0, "Aidite Bio. Kit": 0}}, "shopify": [["Aidite 3D Pro Zir Disc", "Aidite", "ML Pro", 27], ["Aidite superfectZir Zirconia Disc (SHTC/SHTW)", "Aidite", "HT", 13], ["Aidite Honorzir Zirconia Disc (SHTPC/SHTPW)", "Aidite", "SP", 18], ["Aidite PMMA Disc (Mono Shaded)", "Aidite", "PMMA", 9], ["Aidite PMMA Multilayer Disc", "Aidite", "PMMA", 3], ["Haus 3D Multilayered Pro Zirconia Disc", "Haus", "ML Pro", 99], ["Haus High Translucency Plus Zirconia Disc", "Haus", "HT", 43], ["Haus Multilayered Plus Zirconia Disc", "Haus", "ML", 81], ["Haus Sapphire Plus Zirconia Disc", "Haus", "SP", 46], ["Haus Multilayered Plus Zirconia Disc (2)", "Haus", "ML", null]], "evident": [["Disk", "Aidite Honorzic SHTPC+W Zirconia Disk (20mm)", 4, 4], ["HT", "Haus HT Plus Zir Disk (12mm)", 12, 17], ["", "Haus HT Plus Zir Disk (16mm)", 5, null], ["", "Haus HT Plus Zir Disk (20mm)", null, null], ["", "Haus HT Plus Zir Disk (25mm)", null, null], ["ML", "Haus ML Plus Zirconia Disk (12mm)", 155, 169], ["", "Haus ML Plus Zirconia Disk (14mm)", 10, null], ["", "Haus ML Plus Zirconia Disk (16mm)", null, null], ["", "Haus ML Plus Zirconia Disk (18mm)", null, null], ["", "Haus ML Plus Zirconia Disk (20mm)", 3, null], ["", "Haus ML Plus Zirconia Disk (25mm)", 1, null], ["ML Pro", "Haus ML Pro Zirconia Disk (12mm)", 5, 18], ["", "Haus ML Pro Zirconia Disk (14mm)", 12, null], ["", "Haus ML Pro Zirconia Disk (16mm)", null, null], ["", "Haus ML Pro Zirconia Disk (18mm)", null, null], ["", "Haus ML Pro Zirconia Disk (20mm)", 1, null], ["SP", "Haus Sapphire Plus Zirconia Disk (12mm)", null, 1], ["", "Haus Sapphire Plus Zirconia Disk (16mm)", 1, null], ["", "Haus Sapphire Plus Zirconia Disk (20mm)", null, null]], "channel": {"HT+": {"aidite": 13, "haus": 43, "evident": 17}, "ML+": {"aidite": 0, "haus": 81, "evident": 169}, "SP+": {"aidite": 18, "haus": 46, "evident": 5}, "MP pro": {"aidite": 27, "haus": 99, "evident": 18}, "PMMA": {"aidite": 12, "haus": 0, "evident": 0}}, "haus_link": {"HT+": {"mes": 71, "map": "Haus HT+ + SHTC"}, "ML+": {"mes": 252, "map": "Haus ML+ + SHTAPM"}, "SP+": {"mes": 68, "map": "Haus SP+ + SHTPC"}, "MP pro": {"mes": 137, "map": "Haus ML Pro + 3D Pro Zir"}, "PMMA": {"mes": 5, "map": "Pmma (Mono) + Pmma (Multi)"}}};
+const I18N={"ko": {"brand": "HAUS MILLING CENTER", "title_a": "Disc", "title_em": "사용 분석", "title_b": "리포트", "meta": "분석기간 <b>2026.01 – 2026.05</b> · 생성 <b>2026.06.03</b> · <b>v1.4</b> · MES Production + Sale", "tab_ov": "개요", "tab_ha": "Haus/Aidite", "tab_ob": "Other Blocks", "tab_ch": "채널 판매", "tab_rc": "Haus Link 검증", "kpi1": "5월 총 사용량", "kpi2": "5월 Haus/Aidite", "kpi3": "5월 Other Brand", "kpi4": "2026 누적 합계", "kpi1s": "▼ 143 · 12.6% vs 4월", "kpi2s": "▼ 127 · 11.9% vs 4월", "kpi3s": "▼ 15 · 23.1% vs 4월", "kpi4s": "월평균 1,093", "ov_s1": "월별 사용 추이", "ov_s1d": "총량·생산/판매·월평균 대비", "ov_c1": "월별 총 사용량", "ov_c1h": "막대=월 총량 · 점선=월평균(1,093) · 5월 최저", "ov_c2": "Production vs Sale", "ov_c2h": "월별 생산/판매 스택", "ov_s2": "브랜드군 구성", "ov_s2d": "Haus/Aidite vs Other Brand", "ov_c3": "월별 브랜드 구성", "ov_c3h": "HA vs OB 스택 (개)", "ov_c4": "5월 구성비", "ov_c4h": "전체 992개", "ha_s1": "Haus / Aidite 품목별 분석", "ha_s1d": "12개 품목 · 5개월 · Production/Sale", "ha_c1": "품목별 사용량", "ha_c1h": "월 선택 버튼으로 전체 누적/개별 월 전환", "ha_c2": "5월 품목 순위", "ha_c2h": "Production/Sale 구성", "ha_s2": "유의미 변동 (5월 vs 4월)", "ha_s2d": "|변동|>20% & >10개", "ha_s3": "상세 데이터 (Production / Sale)", "ob_s1": "Other Blocks 품목별 분석", "ob_s1d": "11개 품목 · 5개월 · Production 기준", "ob_c1": "월별 생산 추이 (Production)", "ob_c1h": "Other Brand 월별 생산량", "ob_c2": "품목별 생산 비중 (Production)", "ob_c2h": "5개월 생산 합계 기준", "ob_s2": "품목별 생산량 (Production)", "ob_c3": "Other Blocks 품목별 생산량", "ob_c3h": "월 선택 버튼으로 전체 누적/개별 월 전환", "ob_s3": "상세 데이터 (Production)", "ch_s1": "채널별 집계 (Shopify + Evident)", "ch_s1d": "2026.05 · 카테고리별 자동집계", "ch_c1": "카테고리 × 채널", "ch_c1h": "Aidite / Haus(Shopify) / Evident 스택", "ch_c2": "채널 비중", "ch_c2h": "전체 548개", "ch_s2": "채널별 집계표", "ch_shop": "🛒 Shopify 판매", "ch_shoph": "Net items sold (5월)", "ch_ev": "📦 Evident 판매", "ch_evh": "Product Activity Report (01–31 May 26)", "rc_s1": "Haus Link vs Shopify+Evident 데이터 검증 분석", "rc_s1d": "판매채널(Shopify+Evident) vs Haus Link 판매기록 대조", "rc_bh": "전체 <b>5개 카테고리 모두 불일치</b> · 순차이 <b>+15개</b>", "rc_bp": "판매채널(Shopify+Evident) 합계 <b>548개</b> vs Haus Link 판매기록 <b>533개</b> — 판매채널이 15개 더 많습니다. (Aidite 3D Pro Zir Disc 27개 판매 반영) 가장 큰 차이는 <b>MP pro·PMMA (각 +7개)</b>로, 판매채널이 Haus Link 기록보다 많아 Haus Link 미기록 가능성을 점검해야 합니다.", "rc_c1": "카테고리별 차이", "rc_c1h": "판매채널 - Haus Link (양수=채널이 많음)", "rc_c2": "판매채널 vs Haus Link 비교", "rc_c2h": "카테고리별 막대 비교", "rc_s2": "대조표", "rc_note": "<b>해석 가이드.</b> 차이(Diff) = 판매채널 − Haus Link 기록. <b>양수(+)</b>는 채널에서 더 많이 팔린 것으로 잡힌 경우(Haus Link 미기록 가능성), <b>음수(−)</b>는 Haus Link에 판매가 더 많이 기록된 경우(채널 외 직접판매/오기입 가능성)입니다. MP pro +7은 ML Pro/3D Pro Zir 계열에서 판매채널이 Haus Link보다 7개 많다는 의미로, Haus Link 누락 여부를 점검하세요.", "footer1": "<b>HAUS MILLING CENTER</b> · Disc 사용 분석 리포트 · 2026.01–05 v1.4", "footer2": "Generated 2026.06.03 · MES Disc Stock In/Out + Shopify + Evident Channel", "all": "전체(누적)", "prod": "Production", "sale": "Sale", "total": "합계", "totalRow": "Total", "th_item": "품목", "th_type": "구분", "th_5v4": "5월vs4월", "th_cat": "카테고리", "th_map": "매핑 (Haus Link 품목)", "th_ch": "판매채널<br>(Shopify+Evident)", "th_mes": "Haus Link<br>(판매기록)", "th_diff": "차이<br>(채널-Haus Link)", "th_match": "일치 여부", "th_prod": "Product", "th_vendor": "Vendor", "th_type2": "Type", "th_sold": "Sold", "th_catc": "Cat", "th_qty": "Qty", "th_sub": "소계", "mismatch": "✗ 불일치", "ha_ch": "Haus/Aidite", "ob_ch": "Other Brand", "haRank": "5월 품목 순위", "evTotal": "총계", "monS": "월별 브랜드 구성", "sumRow": "5개 카테고리", "lcAidite": "Aidite (Shopify)", "lcHaus": "Haus (Shopify)", "lcEvident": "Evident", "obTrendLbl": "Other Brand 생산량", "diffLbl": "차이 (채널-Haus Link)", "chSaleLbl": "판매채널 (S+E)", "mesLbl": "Haus Link 판매기록", "monthAvg": "월평균", "ob_note": "<b>※ Other Blocks는 생산 투입(Production) 기준입니다.</b> 별도로 1~3월에 Sale 50개(Explore-F 43, Aidite Bio. Kit 7)가 존재하며 본 표·차트에서는 제외했습니다. 4~5월 Sale은 0건입니다.", "ob_s4": "상세 데이터 (Sales)", "ob_s4d": "판매 기록이 있는 품목만 표시 (1~3월)"}, "en": {"brand": "HAUS MILLING CENTER", "title_a": "Disc", "title_em": "Usage Analysis", "title_b": "Report", "meta": "Period <b>2026.01 – 2026.05</b> · Generated <b>2026.06.03</b> · <b>v1.4</b> · MES Production + Sale", "tab_ov": "Overview", "tab_ha": "Haus/Aidite", "tab_ob": "Other Blocks", "tab_ch": "Channel Sales", "tab_rc": "Haus Link Check", "kpi1": "May Total Usage", "kpi2": "May Haus/Aidite", "kpi3": "May Other Brand", "kpi4": "2026 Cumulative", "kpi1s": "▼ 143 · 12.6% vs Apr", "kpi2s": "▼ 127 · 11.9% vs Apr", "kpi3s": "▼ 15 · 23.1% vs Apr", "kpi4s": "Monthly Avg 1,093", "ov_s1": "Monthly Usage Trend", "ov_s1d": "Total · Prod/Sale · vs Monthly Avg", "ov_c1": "Monthly Total Usage", "ov_c1h": "Bar=Monthly total · Dashed=Avg(1,093) · May lowest", "ov_c2": "Production vs Sale", "ov_c2h": "Monthly Prod/Sale stack", "ov_s2": "Brand Composition", "ov_s2d": "Haus/Aidite vs Other Brand", "ov_c3": "Monthly Brand Mix", "ov_c3h": "HA vs OB stack (units)", "ov_c4": "May Composition", "ov_c4h": "Total 992 units", "ha_s1": "Haus / Aidite Item Analysis", "ha_s1d": "12 items · 5 months · Production/Sale", "ha_c1": "Item Usage", "ha_c1h": "Use month buttons to switch cumulative / single month", "ha_c2": "May Item Ranking", "ha_c2h": "Production/Sale breakdown", "ha_s2": "Significant Changes (May vs Apr)", "ha_s2d": "|Change|>20% & >10 units", "ha_s3": "Detailed Data (Production / Sale)", "ob_s1": "Other Blocks Item Analysis", "ob_s1d": "11 items · 5 months · Production basis", "ob_c1": "Monthly Production Trend", "ob_c1h": "Other Brand monthly production", "ob_c2": "Production Share by Item", "ob_c2h": "Based on 5-month production", "ob_s2": "Item Production (Production)", "ob_c3": "Other Blocks Production by Item", "ob_c3h": "Use month buttons to switch cumulative / single month", "ob_s3": "Detailed Data (Production)", "ch_s1": "Channel Summary (Shopify + Evident)", "ch_s1d": "2026.05 · Auto-aggregated by category", "ch_c1": "Category × Channel", "ch_c1h": "Aidite / Haus(Shopify) / Evident stack", "ch_c2": "Channel Share", "ch_c2h": "Total 548 units", "ch_s2": "Channel Summary Table", "ch_shop": "🛒 Shopify Sales", "ch_shoph": "Net items sold (May)", "ch_ev": "📦 Evident Sales", "ch_evh": "Product Activity Report (01–31 May 26)", "rc_s1": "Haus Link vs Shopify+Evident Data Verification", "rc_s1d": "Sales channels (Shopify+Evident) vs Haus Link records", "rc_bh": "<b>All 5 categories mismatched</b> · Net difference <b>+15 units</b>", "rc_bp": "Sales channels (Shopify+Evident) total <b>548</b> vs Haus Link records <b>533</b> — channels 15 more. (Reflects Aidite 3D Pro Zir Disc 27 sold) Largest gaps are <b>MP pro & PMMA (+7 each)</b>, where channels exceed Haus Link — check possible Haus Link omissions.", "rc_c1": "Difference by Category", "rc_c1h": "Channel - Haus Link (positive=channel higher)", "rc_c2": "Sales Channel vs Haus Link", "rc_c2h": "Bar comparison by category", "rc_s2": "Reconciliation Table", "rc_note": "<b>Reading guide.</b> Diff = Sales channel − Haus Link record. <b>Positive (+)</b> means more sold via channels (possible Haus Link omission); <b>Negative (−)</b> means more recorded in Haus Link (possible direct sale / entry error). MP pro +7 means channels exceed Haus Link by 7 in the ML Pro/3D Pro Zir line — check for Haus Link omissions.", "footer1": "<b>HAUS MILLING CENTER</b> · Disc Usage Analysis Report · 2026.01–05 v1.4", "footer2": "Generated 2026.06.03 · MES Disc Stock In/Out + Shopify + Evident Channel", "all": "All (Cumulative)", "prod": "Production", "sale": "Sale", "total": "Total", "totalRow": "Total", "th_item": "Item", "th_type": "Type", "th_5v4": "May vs Apr", "th_cat": "Category", "th_map": "Mapping (Haus Link items)", "th_ch": "Sales Channel<br>(Shopify+Evident)", "th_mes": "Haus Link<br>(Record)", "th_diff": "Diff<br>(Channel-Haus Link)", "th_match": "Match", "th_prod": "Product", "th_vendor": "Vendor", "th_type2": "Type", "th_sold": "Sold", "th_catc": "Cat", "th_qty": "Qty", "th_sub": "Subtotal", "mismatch": "✗ Mismatch", "ha_ch": "Haus/Aidite", "ob_ch": "Other Brand", "haRank": "May Item Ranking", "evTotal": "Total", "monS": "Monthly Brand Mix", "sumRow": "5 categories", "lcAidite": "Aidite (Shopify)", "lcHaus": "Haus (Shopify)", "lcEvident": "Evident", "obTrendLbl": "Other Brand Production", "diffLbl": "Diff (Channel-Haus Link)", "chSaleLbl": "Sales Channel (S+E)", "mesLbl": "Haus Link Record", "monthAvg": "Monthly Avg", "ob_note": "<b>※ Other Blocks is based on Production (input) only.</b> Separately, 50 Sale units exist in Jan–Mar (Explore-F 43, Aidite Bio. Kit 7), excluded from this table/chart. Apr–May Sale is 0.", "ob_s4": "Detailed Data (Sales)", "ob_s4d": "Only items with sales records (Jan–Mar)"}};
+
+let LANG='en';
+const M=[1,2,3,4,5];
+const MN={ko:['1월','2월','3월','4월','5월'],en:['Jan','Feb','Mar','Apr','May']};
+const NAVY='#0A2342',DARK='#1F4E79',MID='#2E75B6',GOLD='#C8A456',GOLDL='#E5C77E',SKY='#BDD7EE',MINT='#7FB77E',CREAM='#E8C872',UP='#2E9E5B',DN='#D64545',WARN='#E8A33D';
+const HA=['Haus HT+','Haus ML+','Haus SP+','Haus ML Pro','SHTC','SHTAPM','SHTPC','3D Pro Zir','Pmma (Mono)','Pmma (Multi)','Pmma (Pink)','Titanium Disk'];
+const OB=['Explore - F','Argen HT','Argen ST','Bruxzir','Katana STML','Katana UTML','Layzir','Prime','Ivotion-U','Ivotion-L','Aidite Bio. Kit'];
+const PAL=['#0A2342','#1F4E79','#2E75B6','#5B9BD5','#8DB4D9','#C8A456','#E5C77E','#7FB77E','#A8CFA0','#D64545','#E88B8B','#9B8BC4'];
+const OBPAL=PAL.concat(['#B8956A']);
+const CATS=['HT+','ML+','SP+','MP pro','PMMA'];
+Chart.defaults.font.family="'Pretendard',sans-serif";Chart.defaults.font.size=11.5;Chart.defaults.color='#6B7280';
+function t(k){return (I18N[LANG][k]!==undefined)?I18N[LANG][k]:k}
+const totals=M.map(m=>DATA.monthly[m].total),avg=totals.reduce((a,b)=>a+b,0)/5;
+let curTab='ov',haMonth='all',obMonth='all';
+const charts={};
+function destroy(id){if(charts[id]){charts[id].destroy();delete charts[id]}}
+
+// ===== LANG =====
+function applyLang(){
+  document.documentElement.lang=LANG;
+  document.querySelectorAll('[data-i]').forEach(e=>{e.textContent=t(e.dataset.i)});
+  document.querySelectorAll('[data-ih]').forEach(e=>{e.innerHTML=t(e.dataset.ih)});
+  // month toggles
+  ['haMtog','obMtog'].forEach(id=>{
+    const btns=document.querySelectorAll('#'+id+' button');
+    btns[0].textContent=t('all');
+    for(let i=1;i<=5;i++)btns[i].textContent=MN[LANG][i-1];
+  });
+  renderTab(curTab,true);
+}
+document.querySelectorAll('.lang-tog button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('.lang-tog button').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active');LANG=b.dataset.lang;applyLang();
+});
+
+// ===== TABS =====
+document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('.tabs button').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active');document.getElementById(b.dataset.tab).classList.add('active');
+  curTab=b.dataset.tab;renderTab(curTab);
+});
+
+// month toggles
+document.querySelectorAll('#haMtog button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('#haMtog button').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active');haMonth=b.dataset.m;renderHaStack();renderHaRank();
+});
+document.querySelectorAll('#obMtog button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('#obMtog button').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active');obMonth=b.dataset.m;renderObStack();
+});
+
+function cu(id,tv){let e=document.getElementById(id),c=0,s=tv/45,iv=setInterval(()=>{c+=s;if(c>=tv){c=tv;clearInterval(iv)}e.textContent=Math.round(c).toLocaleString()},16)}
+
+function renderHaStack(){
+  destroy('haStack');const ctx=document.getElementById('haStack');if(!ctx)return;
+  let ds;
+  if(haMonth==='all'){ds=M.map((m,i)=>({label:MN[LANG][i],data:HA.map(it=>DATA.ha_item[m][it]),backgroundColor:PAL[i*2],borderRadius:3,stack:'s'}))}
+  else{const m=haMonth;ds=[{label:MN[LANG][m-1],data:HA.map(it=>DATA.ha_item[m][it]),backgroundColor:MID,borderRadius:4}]}
+  charts['haStack']=new Chart(ctx,{type:'bar',data:{labels:HA,datasets:ds},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{usePointStyle:true,padding:12}}},
+    scales:{y:{stacked:haMonth==='all',beginAtZero:true,grid:{color:'#EEF1F6'}},x:{stacked:haMonth==='all',grid:{display:false},ticks:{maxRotation:42,minRotation:42,font:{size:9.5}}}}}});
+}
+function rankTitle(){
+  if(haMonth==='all')return LANG==='ko'?'전체 품목 순위 (누적)':'Item Ranking (Cumulative)';
+  return LANG==='ko'? MN.ko[haMonth-1]+' 품목 순위' : MN.en[haMonth-1]+' Item Ranking';
+}
+function renderHaRank(){
+  destroy('haRank');const ctx=document.getElementById('haRank');if(!ctx)return;
+  const tt=document.getElementById('haRankTitle');if(tt)tt.textContent=rankTitle();
+  let pf,sf;
+  if(haMonth==='all'){pf=it=>M.reduce((s,m)=>s+DATA.ha_p[m][it],0);sf=it=>M.reduce((s,m)=>s+DATA.ha_s[m][it],0);}
+  else{pf=it=>DATA.ha_p[haMonth][it];sf=it=>DATA.ha_s[haMonth][it];}
+  const sorted=[...HA].sort((a,b)=>(pf(b)+sf(b))-(pf(a)+sf(a)));
+  charts['haRank']=new Chart(ctx,{type:'bar',data:{labels:sorted,datasets:[
+    {label:t('prod'),data:sorted.map(pf),backgroundColor:MINT,borderRadius:4,stack:'s'},
+    {label:t('sale'),data:sorted.map(sf),backgroundColor:CREAM,borderRadius:4,stack:'s'}]},
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{usePointStyle:true,padding:12}}},scales:{x:{stacked:true,beginAtZero:true,grid:{color:'#EEF1F6'}},y:{stacked:true,grid:{display:false},ticks:{font:{size:10}}}}}});
+}
+function renderObStack(){
+  destroy('obStack');const ctx=document.getElementById('obStack');if(!ctx)return;
+  let ds;
+  if(obMonth==='all'){ds=M.map((m,i)=>({label:MN[LANG][i],data:OB.map(it=>DATA.ob_p[m][it]),backgroundColor:PAL[i*2],borderRadius:3,stack:'s'}))}
+  else{const m=obMonth;ds=[{label:MN[LANG][m-1],data:OB.map(it=>DATA.ob_p[m][it]),backgroundColor:GOLD,borderRadius:4}]}
+  charts['obStack']=new Chart(ctx,{type:'bar',data:{labels:OB,datasets:ds},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{usePointStyle:true,padding:10,font:{size:10}}}},
+    scales:{y:{stacked:obMonth==='all',beginAtZero:true,grid:{color:'#EEF1F6'}},x:{stacked:obMonth==='all',grid:{display:false},ticks:{maxRotation:42,minRotation:42,font:{size:9.5}}}}}});
+}
+
+function renderTab(tab,relang){
+  if(relang){for(let k in charts)destroy(k);}
+  if(tab==='ov'){
+    destroy('trendChart');charts['trendChart']=new Chart(document.getElementById('trendChart'),{type:'bar',data:{labels:MN[LANG],datasets:[
+      {label:t('ov_c1'),data:totals,backgroundColor:totals.map(v=>v===Math.min(...totals)?DN:MID),borderRadius:7,maxBarThickness:46,order:2},
+      {label:t('monthAvg'),data:totals.map(()=>avg),type:'line',borderColor:GOLD,borderWidth:2,borderDash:[6,4],pointRadius:0,order:1}]},
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{usePointStyle:true,padding:14}}},scales:{y:{beginAtZero:true,grid:{color:'#EEF1F6'}},x:{grid:{display:false}}}}});
+    destroy('psChart');charts['psChart']=new Chart(document.getElementById('psChart'),{type:'bar',data:{labels:MN[LANG],datasets:[
+      {label:t('prod'),data:M.map(m=>DATA.monthly[m].prod),backgroundColor:MINT,borderRadius:5,stack:'s'},
+      {label:t('sale'),data:M.map(m=>DATA.monthly[m].sale),backgroundColor:CREAM,borderRadius:5,stack:'s'}]},
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{usePointStyle:true,padding:14}}},scales:{y:{stacked:true,beginAtZero:true,grid:{color:'#EEF1F6'}},x:{stacked:true,grid:{display:false}}}}});
+    destroy('stackChart');charts['stackChart']=new Chart(document.getElementById('stackChart'),{type:'bar',data:{labels:MN[LANG],datasets:[
+      {label:t('ha_ch'),data:M.map(m=>DATA.monthly[m].ha),backgroundColor:DARK,borderRadius:5,stack:'s'},
+      {label:t('ob_ch'),data:M.map(m=>DATA.monthly[m].ob),backgroundColor:GOLD,borderRadius:5,stack:'s'}]},
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{usePointStyle:true,padding:14}}},scales:{y:{stacked:true,beginAtZero:true,grid:{color:'#EEF1F6'}},x:{stacked:true,grid:{display:false}}}}});
+    destroy('donutChart');charts['donutChart']=new Chart(document.getElementById('donutChart'),{type:'doughnut',data:{labels:[t('ha_ch'),t('ob_ch')],datasets:[{data:[DATA.monthly[5].ha,DATA.monthly[5].ob],backgroundColor:[DARK,GOLD],borderWidth:3,borderColor:'#fff'}]},
+      options:{responsive:true,maintainAspectRatio:false,cutout:'62%',plugins:{legend:{position:'bottom',labels:{usePointStyle:true,padding:16}},tooltip:{callbacks:{label:c=>`${c.label}: ${c.raw} (${(c.raw/992*100).toFixed(1)}%)`}}}}});
+  }
+  if(tab==='ha'){
+    renderHaStack();renderHaRank();
+    const sig=[{n:'Haus SP+',m:-59,p:-43.1,a:-20.1,d:'dn'},{n:'Haus ML Pro',m:-52,p:-27.2,a:-14.4,d:'dn'},{n:'SHTAPM',m:37,p:61.7,a:54.0,d:'up'},{n:'3D Pro Zir',m:-25,p:-43.1,a:-33.5,d:'dn'},{n:'Pmma (Pink)',m:14,p:350.0,a:136.8,d:'up'}];
+    const avgL=LANG==='ko'?'5개월 평균대비':'vs 5-mo avg', unit=LANG==='ko'?'개':'';
+    document.getElementById('haSig').innerHTML=sig.map(s=>`<div class="sig ${s.d}"><div class="arr">${s.d==='up'?'▲':'▼'}</div><div class="sig-name">${s.n}</div><div class="sig-mom">${s.m>0?'+':''}${s.m}<span style="font-size:12px;font-family:Pretendard"> ${unit} (${s.p>0?'+':''}${s.p}%)</span></div><div class="sig-avg">${avgL} ${s.a>0?'+':''}${s.a}%</div></div>`).join('');
+    haTable();
+  }
+  if(tab==='ob'){
+    destroy('obTrend');charts['obTrend']=new Chart(document.getElementById('obTrend'),{type:'line',data:{labels:MN[LANG],datasets:[{label:t('obTrendLbl'),data:M.map(m=>OB.reduce((s,it)=>s+DATA.ob_p[m][it],0)),borderColor:GOLD,backgroundColor:'rgba(200,164,86,.12)',borderWidth:2.5,fill:true,tension:.35,pointRadius:5,pointBackgroundColor:'#fff',pointBorderColor:GOLD,pointBorderWidth:2}]},
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,grid:{color:'#EEF1F6'}},x:{grid:{display:false}}}}});
+    const obSum=OB.map(it=>M.reduce((s,m)=>s+DATA.ob_p[m][it],0));
+    destroy('obDonut');charts['obDonut']=new Chart(document.getElementById('obDonut'),{type:'doughnut',data:{labels:OB,datasets:[{data:obSum,backgroundColor:OBPAL,borderWidth:2,borderColor:'#fff'}]},
+      options:{responsive:true,maintainAspectRatio:false,cutout:'58%',plugins:{legend:{position:'right',labels:{usePointStyle:true,padding:8,font:{size:10}}}}}});
+    renderObStack();obTable();obSalesTable();
+  }
+  if(tab==='ch'){
+    destroy('chChart');charts['chChart']=new Chart(document.getElementById('chChart'),{type:'bar',data:{labels:CATS,datasets:[
+      {label:t('lcAidite'),data:CATS.map(c=>DATA.channel[c].aidite),backgroundColor:MID,borderRadius:4,stack:'s'},
+      {label:t('lcHaus'),data:CATS.map(c=>DATA.channel[c].haus),backgroundColor:DARK,borderRadius:4,stack:'s'},
+      {label:t('lcEvident'),data:CATS.map(c=>DATA.channel[c].evident),backgroundColor:GOLD,borderRadius:4,stack:'s'}]},
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{usePointStyle:true,padding:12}}},scales:{y:{stacked:true,beginAtZero:true,grid:{color:'#EEF1F6'}},x:{stacked:true,grid:{display:false}}}}});
+    const aid=CATS.reduce((s,c)=>s+DATA.channel[c].aidite,0),hau=CATS.reduce((s,c)=>s+DATA.channel[c].haus,0),evi=CATS.reduce((s,c)=>s+DATA.channel[c].evident,0);
+    destroy('chDonut');charts['chDonut']=new Chart(document.getElementById('chDonut'),{type:'doughnut',data:{labels:[t('lcAidite'),t('lcHaus'),t('lcEvident')],datasets:[{data:[aid,hau,evi],backgroundColor:[MID,DARK,GOLD],borderWidth:3,borderColor:'#fff'}]},
+      options:{responsive:true,maintainAspectRatio:false,cutout:'60%',plugins:{legend:{position:'bottom',labels:{usePointStyle:true,padding:14}},tooltip:{callbacks:{label:c=>`${c.label}: ${c.raw} (${(c.raw/548*100).toFixed(1)}%)`}}}}});
+    chTable();shopTable();evTable();
+  }
+  if(tab==='rc'){
+    const chv=CATS.map(c=>DATA.channel[c].aidite+DATA.channel[c].haus+DATA.channel[c].evident);
+    const mesv=CATS.map(c=>DATA.haus_link[c].mes);const diff=CATS.map((c,i)=>chv[i]-mesv[i]);
+    destroy('rcChart');charts['rcChart']=new Chart(document.getElementById('rcChart'),{type:'bar',data:{labels:CATS,datasets:[{label:t('diffLbl'),data:diff,backgroundColor:diff.map(d=>d>=0?UP:DN),borderRadius:6,maxBarThickness:54}]},
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`${c.raw>0?'+':''}${c.raw}`}}},scales:{y:{grid:{color:'#EEF1F6'}},x:{grid:{display:false}}}}});
+    destroy('rcCompare');charts['rcCompare']=new Chart(document.getElementById('rcCompare'),{type:'bar',data:{labels:CATS,datasets:[
+      {label:t('chSaleLbl'),data:chv,backgroundColor:MID,borderRadius:5},{label:t('mesLbl'),data:mesv,backgroundColor:NAVY,borderRadius:5}]},
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{usePointStyle:true,padding:12}}},scales:{y:{beginAtZero:true,grid:{color:'#EEF1F6'}},x:{grid:{display:false}}}}});
+    rcTable();
+  }
+}
+
+function haTable(){
+  let h='<thead><tr><th>'+t('th_item')+'</th><th class="grp">'+t('th_type')+'</th>'+MN[LANG].map(m=>'<th>'+m+'</th>').join('')+'<th>'+t('total')+'</th><th>'+t('th_5v4')+'</th></tr></thead><tbody>';
+  HA.forEach(it=>{const tot=M.reduce((s,m)=>s+DATA.ha_item[m][it],0);const chg=DATA.ha_item[5][it]-DATA.ha_item[4][it];const cls=chg>0?'up':(chg<0?'dn':'');
+    h+=`<tr class="row-mon"><td>${it}</td><td>${t('total')}</td>`+M.map(m=>'<td>'+(DATA.ha_item[m][it]||'·')+'</td>').join('')+`<td>${tot}</td><td class="${cls}">${chg>0?'▲':(chg<0?'▼':'–')} ${chg!==0?Math.abs(chg):''}</td></tr>`;
+    h+=`<tr class="row-prod"><td></td><td>${t('prod')}</td>`+M.map(m=>'<td>'+(DATA.ha_p[m][it]||'·')+'</td>').join('')+`<td>${M.reduce((s,m)=>s+DATA.ha_p[m][it],0)}</td><td>–</td></tr>`;
+    h+=`<tr class="row-sale"><td></td><td>${t('sale')}</td>`+M.map(m=>'<td>'+(DATA.ha_s[m][it]||'·')+'</td>').join('')+`<td>${M.reduce((s,m)=>s+DATA.ha_s[m][it],0)}</td><td>–</td></tr>`;});
+  document.getElementById('haTbl').innerHTML=h+'</tbody>';
+}
+function obTable(){
+  let h='<thead><tr><th>'+t('th_item')+'</th>'+MN[LANG].map(m=>'<th>'+m+'</th>').join('')+'<th>'+t('total')+'</th><th>'+t('th_5v4')+'</th></tr></thead><tbody>';
+  OB.forEach(it=>{const vals=M.map(m=>DATA.ob_p[m][it]);const tot=vals.reduce((a,b)=>a+b,0);const chg=vals[4]-vals[3];const cls=chg>0?'up':(chg<0?'dn':'');
+    h+=`<tr><td>${it}</td>`+vals.map((v,i)=>'<td'+(i===4?' style="font-weight:700;color:#0A2342"':'')+'>'+(v||'·')+'</td>').join('')+`<td style="font-weight:700">${tot}</td><td class="${cls}">${chg>0?'▲':(chg<0?'▼':'–')} ${chg!==0?Math.abs(chg):''}</td></tr>`});
+  const obPm=m=>OB.reduce((s,it)=>s+DATA.ob_p[m][it],0);
+  h+='<tr class="row-tot"><td>'+t('totalRow')+'</td>'+M.map(m=>'<td>'+obPm(m)+'</td>').join('')+`<td>${M.reduce((s,m)=>s+obPm(m),0)}</td><td>–</td></tr>`;
+  document.getElementById('obTbl').innerHTML=h+'</tbody>';
+}
+function obSalesTable(){
+  const sItems=OB.filter(it=>M.reduce((s,m)=>s+DATA.ob_s[m][it],0)>0);
+  let h='<thead><tr><th>'+t('th_item')+'</th>'+MN[LANG].map(m=>'<th>'+m+'</th>').join('')+'<th>'+t('total')+'</th></tr></thead><tbody>';
+  sItems.forEach(it=>{const vals=M.map(m=>DATA.ob_s[m][it]);const tot=vals.reduce((a,b)=>a+b,0);
+    h+=`<tr><td>${it}</td>`+vals.map(v=>'<td>'+(v||'·')+'</td>').join('')+`<td style="font-weight:700">${tot}</td></tr>`});
+  const sm=m=>sItems.reduce((s,it)=>s+DATA.ob_s[m][it],0);
+  h+='<tr class="row-tot"><td>'+t('totalRow')+'</td>'+M.map(m=>'<td>'+(sm(m)||'·')+'</td>').join('')+`<td>${M.reduce((s,m)=>s+sm(m),0)}</td></tr>`;
+  document.getElementById('obTbl2').innerHTML=h+'</tbody>';
+}
+function chTable(){
+  let h='<thead><tr><th>'+t('th_cat')+'</th><th>'+t('lcAidite')+'</th><th>'+t('lcHaus')+'</th><th>'+t('lcEvident')+'</th><th>'+t('total')+'</th></tr></thead><tbody>';
+  let ta=0,th2=0,te=0,tt=0;
+  CATS.forEach(c=>{const a=DATA.channel[c].aidite,hh=DATA.channel[c].haus,e=DATA.channel[c].evident,tv=a+hh+e;ta+=a;th2+=hh;te+=e;tt+=tv;
+    h+=`<tr><td>${c}</td><td>${a||'·'}</td><td>${hh||'·'}</td><td>${e||'·'}</td><td style="font-weight:700">${tv}</td></tr>`});
+  h+=`<tr class="row-tot"><td>${t('totalRow')}</td><td>${ta}</td><td>${th2}</td><td>${te}</td><td>${tt}</td></tr>`;
+  document.getElementById('chTbl').innerHTML=h+'</tbody>';
+}
+function shopTable(){
+  let h='<thead><tr><th>'+t('th_prod')+'</th><th>'+t('th_vendor')+'</th><th>'+t('th_type2')+'</th><th>'+t('th_sold')+'</th></tr></thead><tbody>';
+  DATA.shopify.forEach(r=>{const chip=r[1]==='Aidite'?'aidite':'haus';h+=`<tr><td style="font-size:11.5px">${r[0]}</td><td><span class="chip ${chip}">${r[1]}</span></td><td>${r[2]}</td><td style="font-weight:700">${r[3]!==null?r[3]:'·'}</td></tr>`});
+  document.getElementById('shopTbl').innerHTML=h+'</tbody>';
+}
+function evTable(){
+  let h='<thead><tr><th>'+t('th_catc')+'</th><th>'+t('th_prod')+'</th><th>'+t('th_qty')+'</th><th>'+t('th_sub')+'</th></tr></thead><tbody>';
+  DATA.evident.forEach(r=>{h+=`<tr><td>${r[0]?'<span class=chip ha>'+r[0]+'</span>':''}</td><td style="font-size:11px;text-align:left">${r[1]}</td><td>${r[2]!==null?r[2]:'·'}</td><td style="font-weight:700">${r[3]!==null?r[3]:''}</td></tr>`});
+  h+='<tr class="row-tot"><td>Disk</td><td style="text-align:left">'+t('evTotal')+'</td><td>209</td><td>209</td></tr>';
+  document.getElementById('evTbl').innerHTML=h+'</tbody>';
+}
+function rcTable(){
+  let h='<thead><tr><th>'+t('th_cat')+'</th><th>'+t('th_map')+'</th><th>'+t('th_ch')+'</th><th>'+t('th_mes')+'</th><th>'+t('th_diff')+'</th><th>'+t('th_match')+'</th></tr></thead><tbody>';
+  let tc=0,tm=0;
+  CATS.forEach(c=>{const ch=DATA.channel[c].aidite+DATA.channel[c].haus+DATA.channel[c].evident;const mes=DATA.haus_link[c].mes;const diff=ch-mes;tc+=ch;tm+=mes;
+    const dc=diff>0?'diff-pos':(diff<0?'diff-neg':'');
+    h+=`<tr><td>${c}</td><td style="text-align:left;font-size:11.5px;color:#6B7280">${DATA.haus_link[c].map}</td><td style="font-weight:700">${ch}</td><td style="font-weight:700">${mes}</td><td class="diff-cell ${dc}">${diff>0?'+':''}${diff}</td><td><span class="match-n">${t('mismatch')}</span></td></tr>`});
+  h+=`<tr class="row-tot"><td>${t('totalRow')}</td><td style="text-align:left">${t('sumRow')}</td><td>${tc}</td><td>${tm}</td><td class="diff-cell diff-neg">${tc-tm}</td><td><span class="match-n">✗</span></td></tr>`;
+  document.getElementById('rcTbl').innerHTML=h+'</tbody>';
+}
+
+cu('k1',992);cu('k2',942);cu('k3',50);cu('k4',5467);
+applyLang();
+</script>
 </body></html>
